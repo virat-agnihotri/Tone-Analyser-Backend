@@ -1,0 +1,23 @@
+Speech-to-text model
+For your first implementation, I'd use:
+openai/whisper-small
+
+pip install transformers torch librosa soundfile
+
+from transformers import pipeline
+
+whisper = pipeline(
+    "automatic-speech-recognition",
+    model="openai/whisper-small"
+)
+
+result = whisper("radio.wav")
+
+print(result["text"])
+
+for  emotion through voice model
+speechbrain/emotion-recognition-wav2vec2-IEMOCAP
+
+
+for text emotion
+j-hartmann/emotion-english-distilroberta-base
