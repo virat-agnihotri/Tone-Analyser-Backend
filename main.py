@@ -2,12 +2,22 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import Base, engine
-import models  # Ensures all SQLAlchemy models are registered with Base metadata before create_all
+import models  # Ensures all SQLAlchemy models are registered with Base metadata
 
 from routers import audio, analysis, sessions, reports
 
+
+# ============================================================
+# DATABASE
+# ============================================================
+
 # Create database tables automatically
 Base.metadata.create_all(bind=engine)
+
+
+# ============================================================
+# FASTAPI APPLICATION
+# ============================================================
 
 app = FastAPI(
     title="Silent Co-Driver API",
@@ -15,28 +25,58 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Configure CORS for local development + deployed frontend
+
+# ============================================================
+# CORS CONFIGURATION
+# ============================================================
+
+# Local development + deployed Vercel frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:3000",
-        "https://tone-analyse-frontendd.vercel.app",
+        "https://tone-analyser-fronteddd.vercel.app",
     ],
-    # Also allow any Vercel preview URL for this project (e.g. tone-analyse-frontendd-<hash>.vercel.app)
-    allow_origin_regex=r"https://tone-analyse-frontendd.*\.vercel\.app",
+    allow_origin_regex=r"https://tone-analyser-fronteddd.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Register API Routers
-app.include_router(sessions.router, prefix="/api/sessions", tags=["Sessions"])
-app.include_router(audio.router, prefix="/api/audio", tags=["Audio"])
-app.include_router(analysis.router, prefix="/api/analysis", tags=["Analysis"])
-app.include_router(reports.router, prefix="/api/reports", tags=["Reports"])
+# ============================================================
+# API ROUTERS
+# ============================================================
 
+app.include_router(
+    sessions.router,
+    prefix="/api/sessions",
+    tags=["Sessions"]
+)
+
+app.include_router(
+    audio.router,
+    prefix="/api/audio",
+    tags=["Audio"]
+)
+
+app.include_router(
+    analysis.router,
+    prefix="/api/analysis",
+    tags=["Analysis"]
+)
+
+app.include_router(
+    reports.router,
+    prefix="/api/reports",
+    tags=["Reports"]
+)
+
+
+# ============================================================
+# ROOT ENDPOINT
+# ============================================================
 
 @app.get("/")
 def root():
@@ -47,6 +87,12 @@ def root():
     }
 
 
+# ============================================================
+# HEALTH CHECK
+# ============================================================
+
 @app.get("/health")
 def health():
-    return {"status": "healthy"}
+    return {
+        "status": "healthy"
+    }
