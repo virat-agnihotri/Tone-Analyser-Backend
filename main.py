@@ -15,14 +15,17 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Configure CORS for local frontend development
+# Configure CORS for local development + deployed frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:3000",
+        "https://tone-analyse-frontendd.vercel.app",
     ],
+    # Also allow any Vercel preview URL for this project (e.g. tone-analyse-frontendd-<hash>.vercel.app)
+    allow_origin_regex=r"https://tone-analyse-frontendd.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
