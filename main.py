@@ -2,22 +2,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import Base, engine
-import models  # Ensures all SQLAlchemy models are registered with Base metadata
+import models
 
 from routers import audio, analysis, sessions, reports
 
 
-# ============================================================
-# DATABASE
-# ============================================================
-
-# Create database tables automatically
 Base.metadata.create_all(bind=engine)
 
-
-# ============================================================
-# FASTAPI APPLICATION
-# ============================================================
 
 app = FastAPI(
     title="Silent Co-Driver API",
@@ -26,28 +17,25 @@ app = FastAPI(
 )
 
 
-# ============================================================
-# CORS CONFIGURATION
-# ============================================================
-
-# Local development + deployed Vercel frontend
 app.add_middleware(
     CORSMiddleware,
+
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:3000",
+
+        # ACTUAL VERCEL FRONTEND
         "https://tone-analyser-frontenddd.vercel.app",
     ],
+
     allow_origin_regex=r"https://tone-analyser-frontenddd.*\.vercel\.app",
+
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ============================================================
-# API ROUTERS
-# ============================================================
 
 app.include_router(
     sessions.router,
@@ -74,10 +62,6 @@ app.include_router(
 )
 
 
-# ============================================================
-# ROOT ENDPOINT
-# ============================================================
-
 @app.get("/")
 def root():
     return {
@@ -87,12 +71,6 @@ def root():
     }
 
 
-# ============================================================
-# HEALTH CHECK
-# ============================================================
-
 @app.get("/health")
 def health():
-    return {
-        "status": "healthy"
-    }
+    return {"status": "healthy"}
