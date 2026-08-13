@@ -12,7 +12,7 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 
 
 def create_database_if_not_exists():
-    """Create PostgreSQL database if configured and missing."""
+    """Attempt to create PostgreSQL database if running locally and missing."""
     if not (DATABASE_URL.startswith("postgresql") or DATABASE_URL.startswith("postgres")):
         return
 
@@ -34,18 +34,16 @@ def create_database_if_not_exists():
                 connection.execute(text(f'CREATE DATABASE "{database_name}"'))
                 print(f"Database '{database_name}' created successfully.")
         admin_engine.dispose()
-    except Exception as e:
-        print(f"Warning: PostgreSQL database check skipped: {e}")
+    except Exception:
+        # On managed cloud databases like Render PostgreSQL, database creation via admin connection is skipped
+        pass
 
 
 create_database_if_not_exists()
 
-# Engine creation with SQLite thread safety if using SQLite
-engine_kwargs = {}
-if DATABASE_URL.startswith("sqlite"):
-    engine_kwargs["connect_args"] = {"check_same_thread": False}
+# Engine creation for PostgreSQL with pool connection liveness ping
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
-engine = create_engine(DATABASE_URL, **engine_kwargs)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
